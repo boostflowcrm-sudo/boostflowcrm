@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boostflow CRM</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  body { font-family: 'Inter', sans-serif; transition: background-color .2s,color .2s; }
+  html.dark body { background:#0f172a !important; color:#e5e7eb; }
+  html.dark .bg-white { background:#111827 !important; color:#e5e7eb; }
+  html.dark .bg-gray-50 { background:#0f172a !important; }
+  html.dark .bg-gray-100 { background:#111827 !important; }
+  html.dark .text-gray-800 { color:#e5e7eb !important; }
+  html.dark .text-gray-600 { color:#cbd5e1 !important; }
+  html.dark .text-gray-500 { color:#94a3b8 !important; }
+  html.dark .text-gray-400 { color:#64748b !important; }
+  html.dark .border { border-color:#334155 !important; }
+  html.dark input, html.dark textarea, html.dark select { background:#0f172a; color:#e5e7eb; border-color:#334155; }
+  html.dark .menu-btn.active { background:#14532d; color:#bbf7d0; }
+  html.dark dialog { background:#111827; color:#e5e7eb; }
+  .gradient-bg { background: linear-gradient(135deg, #25D366 0%, #128C7E 50%, #075E54 100%); }
+  .whatsapp-btn:hover { transform: scale(1.03); }
+  .menu-btn.active { background:#dcfce7; color:#166534; }
+  dialog::backdrop{ background:rgba(15,23,42,0.55); }
+  dialog{ border:none; border-radius:1rem; padding:0; }
+  .status-Novo{background:#dbeafe;color:#1d4ed8;}
+  .status-Em_conversa{background:#fef9c3;color:#a16207;}
+  .status-Proposta{background:#ffedd5;color:#c2410c;}
+  .status-Fechado{background:#dcfce7;color:#15803d;}
+  .status-Perdido{background:#fee2e2;color:#b91c1c;}
+
+  /* ================= WHATSAPP-STYLE ADMIN ================= */
+  #admin-panel { background:#f4f6f8; }
+  html.dark #admin-panel { background:#0b0d0f !important; }
+  .wa-topbar{background:#111315;color:#f5f5f5;border-bottom:1px solid #292d31}
+  html:not(.dark) .wa-topbar{background:#ffffff;color:#17202a;border-color:#e5e7eb}
+  .wa-brand-dot{background:linear-gradient(135deg,#25D366,#128C7E)}
+  .wa-icon-btn{width:40px;height:40px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;transition:.2s}
+  .wa-icon-btn:hover{background:rgba(37,211,102,.12)}
+  .wa-tabs{background:#111315;border-bottom:1px solid #292d31}
+  html:not(.dark) .wa-tabs{background:#fff;border-color:#e5e7eb}
+  .wa-tab{white-space:nowrap;padding:11px 15px;border-bottom:3px solid transparent;color:#8b949e;font-weight:600;font-size:14px}
+  .wa-tab.active{color:#25D366;border-color:#25D366}
+  html:not(.dark) .wa-tab{color:#667085}
+  html:not(.dark) .wa-tab.active{color:#128C7E}
+  .wa-main{max-width:1100px;margin:0 auto;padding:16px 14px 90px}
+  .wa-hero{background:#111315;color:#fff;border:1px solid #292d31;border-radius:18px;padding:18px;margin-bottom:14px}
+  html:not(.dark) .wa-hero{background:#fff;color:#17202a;border-color:#e5e7eb}
+  .wa-pill{border-radius:999px;padding:7px 11px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+  .wa-pill-green{background:rgba(37,211,102,.14);color:#25D366;border:1px solid rgba(37,211,102,.28)}
+  .wa-pill-red{background:rgba(239,68,68,.14);color:#ff6b6b;border:1px solid rgba(239,68,68,.25)}
+  .wa-pill-muted{background:#25282c;color:#c8ccd1}
+  html:not(.dark) .wa-pill-muted{background:#f1f3f5;color:#667085}
+  .wa-search{background:#1b1f22;border:1px solid #30353a;color:#fff;border-radius:14px;height:48px;width:100%;padding:0 16px 0 44px;outline:none}
+  .wa-search:focus{border-color:#25D366;box-shadow:0 0 0 3px rgba(37,211,102,.1)}
+  html:not(.dark) .wa-search{background:#f7f8fa;color:#17202a;border-color:#e1e5e9}
+  .wa-filter{background:#1b1f22;color:#9ca3af;border:1px solid #30353a;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600}
+  .wa-filter.active{background:#25D366;color:#062b16;border-color:#25D366}
+  html:not(.dark) .wa-filter{background:#fff;border-color:#e1e5e9;color:#667085}
+  html:not(.dark) .wa-filter.active{background:#dcfce7;color:#166534;border-color:#86efac}
+  .wa-conversation{display:flex;gap:12px;align-items:center;background:#111315;border:1px solid #292d31;border-radius:16px;padding:14px;transition:.18s;cursor:pointer}
+  .wa-conversation:hover{border-color:#25D366;transform:translateY(-1px)}
+  html:not(.dark) .wa-conversation{background:#fff;border-color:#e5e7eb}
+  .wa-avatar{width:48px;height:48px;min-width:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#075E54,#25D366);color:#fff;font-weight:800;position:relative}
+  .wa-online{position:absolute;right:0;bottom:1px;width:11px;height:11px;border-radius:50%;background:#25D366;border:2px solid #111315}
+  html:not(.dark) .wa-online{border-color:#fff}
+  .wa-msg-preview{color:#9ca3af;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  html:not(.dark) .wa-msg-preview{color:#667085}
+  .wa-time{font-size:11px;color:#8b949e;white-space:nowrap}
+  .wa-unread{min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:#25D366;color:#063d1c;font-size:11px;font-weight:800;display:inline-flex;align-items:center;justify-content:center}
+  .wa-bottom{position:fixed;bottom:0;left:0;right:0;z-index:40;background:#111315;border-top:1px solid #292d31;display:none}
+  html:not(.dark) .wa-bottom{background:#fff;border-color:#e5e7eb}
+  .wa-bottom button{flex:1;padding:10px 4px;color:#8b949e;font-size:11px}
+  .wa-bottom button.active{color:#25D366}
+  @media(max-width:640px){.wa-main{padding-left:10px;padding-right:10px}.wa-bottom{display:flex}.wa-topbar .desktop-only{display:none}.wa-hero{border-radius:14px}.wa-conversation{padding:12px}.wa-avatar{width:44px;height:44px;min-width:44px}}
+
+  /* ================= CHAT DENTRO DO CRM ================= */
+  .wa-chat-modal{width:min(96vw,760px);height:min(88vh,760px);background:#0b0d0f;color:#f5f5f5;border:1px solid #292d31;border-radius:18px;overflow:hidden}
+  html:not(.dark) .wa-chat-modal{background:#f7f8fa;color:#17202a;border-color:#e5e7eb}
+  .wa-chat-head{background:#111315;border-bottom:1px solid #292d31;padding:13px 16px;display:flex;align-items:center;gap:12px}
+  html:not(.dark) .wa-chat-head{background:#fff;border-color:#e5e7eb}
+  .wa-chat-body{height:calc(100% - 126px);overflow-y:auto;padding:16px;background:#0f1214}
+  html:not(.dark) .wa-chat-body{background:#efeae2}
+  .wa-bubble{max-width:78%;padding:9px 11px;border-radius:12px;margin:6px 0;font-size:14px;line-height:1.4;box-shadow:0 1px 1px rgba(0,0,0,.12);word-break:break-word}
+  .wa-bubble.in{margin-right:auto;background:#202428;color:#f5f5f5;border-top-left-radius:4px}
+  .wa-bubble.out{margin-left:auto;background:#005c4b;color:#fff;border-top-right-radius:4px}
+  html:not(.dark) .wa-bubble.in{background:#fff;color:#17202a}
+  html:not(.dark) .wa-bubble.out{background:#d9fdd3;color:#17202a}
+  .wa-bubble-time{display:block;text-align:right;font-size:10px;opacity:.58;margin-top:3px}
+  .wa-chat-foot{height:70px;padding:10px;background:#111315;border-top:1px solid #292d31;display:flex;gap:8px;align-items:center}
+  html:not(.dark) .wa-chat-foot{background:#fff;border-color:#e5e7eb}
+  .wa-chat-input{flex:1;height:48px;border-radius:24px;border:1px solid #30353a;background:#1b1f22;color:#fff;padding:0 16px;outline:none}
+  html:not(.dark) .wa-chat-input{background:#f3f4f6;color:#17202a;border-color:#d1d5db}
+  .wa-send-btn{width:48px;height:48px;border-radius:50%;background:#25D366;color:#063d1c;border:0;font-size:18px}
+  .wa-send-btn:disabled{opacity:.45}
+  .wa-chat-status{font-size:11px;color:#9ca3af}
+  @media(max-width:640px){.wa-chat-modal{width:100vw;height:100vh;border-radius:0}.wa-chat-body{height:calc(100% - 126px)}.wa-bubble{max-width:86%}}
+
+  /* ================= FILA DE ATENDIMENTO ================= */
+  .wa-waiting-bar{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(92%,620px);z-index:60;display:none;align-items:center;gap:12px;background:#f59e0b;color:#171717;border:1px solid rgba(120,53,15,.18);border-radius:24px;padding:13px 16px;box-shadow:0 12px 30px rgba(0,0,0,.28);cursor:pointer}
+  .wa-waiting-bar.show{display:flex}
+  .wa-waiting-icon{width:38px;height:38px;min-width:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.35);font-size:17px}
+  .wa-waiting-title{font-weight:800;font-size:14px;line-height:1.25}
+  .wa-waiting-sub{font-size:12px;margin-top:2px;opacity:.78}
+  .wa-waiting-time{margin-left:auto;white-space:nowrap;font-weight:900;font-size:13px}
+  @media(max-width:640px){.wa-waiting-bar{bottom:66px;width:calc(100% - 24px);border-radius:20px;padding:12px 14px}.wa-waiting-title{font-size:13px}.wa-waiting-sub{font-size:11px}.wa-waiting-time{font-size:12px}}
+
+</style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- ==================== LANDING PAGE ==================== -->
+  <div id="landing">
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+      <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+          <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center text-white font-bold text-xl">Z</div>
+          <span class="font-bold text-xl">Boostflow <span class="text-green-600">CRM</span></span>
+        </div>
+        <button onclick="irParaAdmin()" class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold text-sm">Entrar no Painel</button>
+      </div>
+    </nav>
+
+    <section class="gradient-bg text-white py-16 md:py-24 px-4 text-center">
+      <h1 class="text-3xl md:text-5xl font-extrabold leading-tight mb-5">Nunca mais perca um lead<br>por falta de follow-up</h1>
+      <p class="text-lg md:text-xl text-green-100 mb-8 max-w-2xl mx-auto">CRM simples + follow-up organizado no WhatsApp.<br>Ideal para equipes de vendas.</p>
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <a href="#" id="landingWaBtn" target="_blank" class="whatsapp-btn bg-white text-green-700 font-bold px-6 py-3.5 rounded-xl text-base flex items-center justify-center gap-2">
+          <i class="fab fa-whatsapp text-xl"></i> Quero comprar pelo WhatsApp
+        </a>
+        <button onclick="irParaAdmin()" class="bg-green-800/40 border-2 border-white/40 text-white font-bold px-6 py-3.5 rounded-xl">Acessar Painel ADM</button>
+      </div>
+    </section>
+
+    <section class="py-14 bg-white px-4">
+      <h2 class="text-2xl md:text-3xl font-bold text-center mb-10">Tudo que sua equipe precisa</h2>
+      <div class="max-w-5xl mx-auto grid md:grid-cols-3 gap-6">
+        <div class="bg-gray-50 p-6 rounded-2xl">
+          <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600 text-xl mb-4"><i class="fas fa-users"></i></div>
+          <h3 class="font-bold text-lg mb-2">CRM Completo</h3>
+          <p class="text-gray-600 text-sm">Cadastre leads, organize por status e acompanhe o histórico.</p>
+        </div>
+        <div class="bg-gray-50 p-6 rounded-2xl">
+          <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600 text-xl mb-4"><i class="fab fa-whatsapp"></i></div>
+          <h3 class="font-bold text-lg mb-2">Follow-up Organizado</h3>
+          <p class="text-gray-600 text-sm">Sequências geram as próximas mensagens automaticamente — você confere e envia.</p>
+        </div>
+        <div class="bg-gray-50 p-6 rounded-2xl">
+          <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600 text-xl mb-4"><i class="fas fa-robot"></i></div>
+          <h3 class="font-bold text-lg mb-2">Automações</h3>
+          <p class="text-gray-600 text-sm">Quando o status muda, a sequência certa é agendada sozinha.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="py-14 bg-gray-50 px-4">
+      <h2 class="text-2xl md:text-3xl font-bold text-center mb-8">Preços simples</h2>
+      <div class="max-w-4xl mx-auto grid md:grid-cols-3 gap-5">
+        <div class="bg-white border rounded-2xl p-6 text-center">
+          <div class="text-gray-500 font-medium mb-1">Starter</div>
+          <div class="text-3xl font-bold mb-4">R$ 97<span class="text-base font-normal text-gray-400">/mês</span></div>
+          <a href="#" class="plano-link block bg-gray-100 py-2.5 rounded-xl font-semibold text-sm" data-plano="Starter" target="_blank">Começar</a>
+        </div>
+        <div class="bg-white border-2 border-green-500 rounded-2xl p-6 text-center relative">
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">Popular</div>
+          <div class="text-green-600 font-medium mb-1">Pro</div>
+          <div class="text-3xl font-bold mb-4">R$ 197<span class="text-base font-normal text-gray-400">/mês</span></div>
+          <a href="#" class="plano-link block bg-green-600 text-white py-2.5 rounded-xl font-semibold text-sm" data-plano="Pro" target="_blank">Começar agora</a>
+        </div>
+        <div class="bg-white border rounded-2xl p-6 text-center">
+          <div class="text-gray-500 font-medium mb-1">Business</div>
+          <div class="text-3xl font-bold mb-4">R$ 397<span class="text-base font-normal text-gray-400">/mês</span></div>
+          <a href="#" class="plano-link block bg-gray-100 py-2.5 rounded-xl font-semibold text-sm" data-plano="Business" target="_blank">Falar com vendas</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="gradient-bg text-white py-12 px-4 text-center">
+      <h2 class="text-2xl font-bold mb-4">Pronto para aumentar suas vendas?</h2>
+      <a href="#" id="ctaWaBtn" target="_blank" class="inline-flex items-center gap-2 bg-white text-green-700 font-bold px-8 py-3.5 rounded-xl">
+        <i class="fab fa-whatsapp text-xl"></i> <span id="ctaWaLabel"></span>
+      </a>
+    </section>
+
+    <footer class="bg-gray-900 text-gray-400 py-6 text-center text-sm">© <span id="anoFooter"></span> Boostflow CRM</footer>
+  </div>
+
+  <!-- ==================== LOGIN ==================== -->
+  <div id="login-screen" class="hidden min-h-screen flex items-center justify-center p-4 bg-gray-100">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-7">
+      <div class="text-center mb-7">
+        <div class="w-14 h-14 bg-gradient-to-br from-green-400 to-green-700 rounded-2xl flex items-center justify-center text-white text-xl font-bold mx-auto mb-3">B</div>
+        <h1 class="text-xl font-bold">Boostflow CRM</h1>
+        <p class="text-gray-500 text-sm" id="login-subtitle">Entrar no painel</p>
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm font-medium mb-1">E-mail</label>
+        <input type="email" id="usuario" autocomplete="username" class="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-green-500" placeholder="voce@email.com">
+      </div>
+      <div class="mb-5">
+        <label class="block text-sm font-medium mb-1">Senha</label>
+        <input type="password" id="senha" autocomplete="current-password" class="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-green-500" placeholder="mínimo 6 caracteres">
+      </div>
+      <button onclick="fazerLogin()" id="btnLogin" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl">Entrar</button>
+      <p id="login-error" class="text-red-500 text-sm text-center mt-3 hidden"></p>
+      <p id="login-info" class="text-green-600 text-sm text-center mt-3 hidden"></p>
+      <button onclick="alternarModoLogin()" id="btnAlternarModo" class="w-full text-center text-sm text-green-700 font-medium mt-4">Não tem conta ainda? Criar uma</button>
+      <p class="text-gray-400 text-xs text-center mt-4 leading-relaxed">🔒 Login real, protegido pelo Supabase — seus dados ficam isolados dos de qualquer outro usuário.</p>
+      <button onclick="voltarLanding()" class="w-full text-center text-sm text-gray-500 mt-5">← Voltar para o site</button>
+    </div>
+  </div>
+
+  <!-- ==================== PAINEL ADM ==================== -->
+  <div id="admin-panel" class="hidden min-h-screen">
+    <header class="wa-topbar sticky top-0 z-30">
+      <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="wa-brand-dot w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold">Z</div>
+          <div>
+            <div class="font-extrabold leading-tight">Boostflow</div>
+            <div class="text-[11px] opacity-60">CRM • WhatsApp</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-1">
+          <a href="#" id="topWaBtn" target="_blank" class="wa-icon-btn text-green-500" title="Abrir WhatsApp"><i class="fab fa-whatsapp text-xl"></i></a>
+          <button onclick="alternarTema()" id="themeBtn" class="wa-icon-btn" title="Modo claro/escuro"><i class="fas fa-moon"></i></button>
+          <button onclick="abrirConfig()" class="wa-icon-btn" title="Configurações"><i class="fas fa-gear"></i></button>
+          <button onclick="sair()" class="wa-icon-btn text-red-400" title="Sair"><i class="fas fa-right-from-bracket"></i></button>
+        </div>
+      </div>
+    </header>
+
+    <nav class="wa-tabs overflow-x-auto sticky top-[65px] z-20">
+      <div class="max-w-6xl mx-auto px-2 flex min-w-max">
+        <button onclick="mostrarSecao('dashboard', this)" class="menu-btn wa-tab active">Dashboard</button>
+        <button onclick="mostrarSecao('clientes', this)" class="menu-btn wa-tab">Clientes</button>
+        <button onclick="mostrarSecao('conversas', this)" class="menu-btn wa-tab">WhatsApp <span id="badgeConversas" class="hidden ml-1 bg-green-500 text-black text-[10px] px-1.5 py-0.5 rounded-full"></span></button>
+        <button onclick="mostrarSecao('followups', this)" class="menu-btn wa-tab">Follow-ups</button>
+        <button onclick="mostrarSecao('sequencias', this)" class="menu-btn wa-tab">Sequências</button>
+        <button onclick="mostrarSecao('automacoes', this)" class="menu-btn wa-tab">Automações</button>
+      </div>
+    </nav>
+
+    <main class="wa-main">
+      <!-- DASHBOARD -->
+      <div id="secao-dashboard">
+        <h2 class="text-xl font-bold mb-4">Dashboard</h2>
+        <div class="grid grid-cols-2 gap-3 mb-6" id="dashStats"></div>
+        <div class="bg-white rounded-xl p-4 shadow-sm mb-4">
+          <h3 class="font-semibold mb-3 text-sm">Próximos Follow-ups</h3>
+          <div id="dashProximos" class="space-y-3 text-sm text-gray-500"></div>
+        </div>
+      </div>
+
+      <!-- CLIENTES -->
+      <div id="secao-clientes" class="hidden">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold">Clientes</h2>
+          <button onclick="abrirLeadModal()" class="bg-green-600 text-white text-sm font-semibold px-4 py-2 rounded-lg"><i class="fas fa-plus mr-1"></i>Novo lead</button>
+        </div>
+        <div id="listaClientes" class="space-y-3"></div>
+      </div>
+
+      <!-- CONVERSAS / WHATSAPP -->
+      <div id="secao-conversas" class="hidden">
+        <div class="wa-hero">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div>
+              <div class="flex items-center gap-2"><i class="fab fa-whatsapp text-green-400 text-2xl"></i><h2 class="text-2xl font-extrabold">WhatsApp</h2></div>
+              <p class="text-sm opacity-60 mt-1">Central de conversas da sua empresa.</p>
+            </div>
+            <button onclick="carregarMensagens()" class="wa-icon-btn opacity-80" title="Atualizar"><i class="fas fa-rotate"></i></button>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <span class="wa-pill wa-pill-green"><i class="fas fa-circle text-[7px]"></i> Conectado</span>
+            <span class="wa-pill wa-pill-muted"><span id="waTotalConversas">0</span> conversas</span>
+            <span class="wa-pill wa-pill-red"><span id="waNaoLidas">0</span> não lidas</span>
+            <span class="wa-pill wa-pill-muted"><span id="waHoje">0</span> hoje</span>
+          </div>
+        </div>
+
+        <div class="relative mb-3">
+          <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          <input id="buscaConversas" oninput="renderConversas()" class="wa-search" placeholder="Buscar nome, número ou mensagem...">
+        </div>
+        <div class="flex gap-2 overflow-x-auto pb-3">
+          <button id="filtroTodos" onclick="setFiltroConversas('todos')" class="wa-filter active">Todos <span id="filtroTodosCount">0</span></button>
+          <button id="filtroNaoLidas" onclick="setFiltroConversas('nao_lidas')" class="wa-filter">Não lidas <span id="filtroNaoLidasCount">0</span></button>
+        </div>
+        <div id="listaConversas" class="space-y-2"></div>
+      </div>
+
+      <!-- FOLLOW-UPS -->
+      <div id="secao-followups" class="hidden">
+        <h2 class="text-xl font-bold mb-4">Follow-ups pendentes</h2>
+        <div id="listaFollowups" class="space-y-3"></div>
+      </div>
+
+      <!-- SEQUÊNCIAS -->
+      <div id="secao-sequencias" class="hidden">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold">Sequências</h2>
+          <button onclick="abrirSeqModal()" class="bg-green-600 text-white text-sm font-semibold px-4 py-2 rounded-lg"><i class="fas fa-plus mr-1"></i>Nova sequência</button>
+        </div>
+        <div id="listaSequencias" class="space-y-3"></div>
+      </div>
+
+      <!-- AUTOMAÇÕES -->
+      <div id="secao-automacoes" class="hidden">
+        <h2 class="text-xl font-bold mb-2">Automações</h2>
+        <p class="text-sm text-gray-500 mb-4">Quando um lead muda para o status abaixo, a sequência escolhida entra na fila de follow-ups automaticamente.</p>
+        <div id="listaAutomacoes" class="space-y-3"></div>
+      </div>
+    </main>
+
+    <div id="waWaitingBar" class="wa-waiting-bar" onclick="abrirFilaAtendimento()">
+      <div class="wa-waiting-icon"><i class="fas fa-user-clock"></i></div>
+      <div class="min-w-0">
+        <div id="waWaitingTitle" class="wa-waiting-title">0 clientes esperando atendente</div>
+        <div id="waWaitingSub" class="wa-waiting-sub">clique para atender agora</div>
+      </div>
+      <div id="waWaitingTime" class="wa-waiting-time">pior: 0 min</div>
+    </div>
+
+    <div class="wa-bottom">
+      <button onclick="mostrarSecao('dashboard', document.querySelectorAll('.menu-btn')[0])"><i class="fas fa-chart-line block text-lg mb-1"></i>Início</button>
+      <button onclick="mostrarSecao('clientes', document.querySelectorAll('.menu-btn')[1])"><i class="fas fa-users block text-lg mb-1"></i>Clientes</button>
+      <button onclick="mostrarSecao('conversas', document.querySelectorAll('.menu-btn')[2])" class="active"><i class="fab fa-whatsapp block text-lg mb-1"></i>WhatsApp</button>
+      <button onclick="mostrarSecao('followups', document.querySelectorAll('.menu-btn')[3])"><i class="fas fa-clock block text-lg mb-1"></i>Follow-ups</button>
+      <button onclick="abrirConfig()"><i class="fas fa-gear block text-lg mb-1"></i>Mais</button>
+    </div>
+  </div>
+
+  <!-- ===== MODAL LEAD ===== -->
+  <dialog id="leadModal" class="w-full max-w-md">
+    <form method="dialog" class="p-6" onsubmit="salvarLead(event)">
+      <h3 class="font-bold text-lg mb-4" id="leadModalTitulo">Novo lead</h3>
+      <input type="hidden" id="leadId">
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-medium mb-1">Nome</label>
+          <input required id="leadNome" class="w-full px-3 py-2 border rounded-lg text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-medium mb-1">WhatsApp (só números, com DDD)</label>
+          <input required id="leadTelefone" placeholder="38999998888" class="w-full px-3 py-2 border rounded-lg text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-medium mb-1">Origem</label>
+          <input id="leadOrigem" placeholder="Instagram, indicação..." class="w-full px-3 py-2 border rounded-lg text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-medium mb-1">Status</label>
+          <select id="leadStatus" class="w-full px-3 py-2 border rounded-lg text-sm">
+            <option value="Novo">Novo</option>
+            <option value="Em_conversa">Em conversa</option>
+            <option value="Proposta">Proposta</option>
+            <option value="Fechado">Fechado</option>
+            <option value="Perdido">Perdido</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium mb-1">Anotações</label>
+          <textarea id="leadNotas" rows="2" class="w-full px-3 py-2 border rounded-lg text-sm"></textarea>
+        </div>
+      </div>
+      <div class="flex gap-2 mt-5">
+        <button type="button" onclick="excluirLeadAtual()" id="btnExcluirLead" class="hidden text-red-600 text-sm font-medium mr-auto">Excluir</button>
+        <button type="button" onclick="fecharModal('leadModal')" class="px-4 py-2 rounded-lg text-sm font-medium text-gray-600">Cancelar</button>
+        <button type="submit" class="px-4 py-2 rounded-lg text-sm font-semibold bg-green-600 text-white">Salvar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ===== MODAL SEQUÊNCIA ===== -->
+  <dialog id="seqModal" class="w-full max-w-lg">
+    <form method="dialog" class="p-6" onsubmit="salvarSequencia(event)">
+      <h3 class="font-bold text-lg mb-4" id="seqModalTitulo">Nova sequência</h3>
+      <input type="hidden" id="seqId">
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-medium mb-1">Nome da sequência</label>
+          <input required id="seqNome" class="w-full px-3 py-2 border rounded-lg text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-medium mb-1">Descrição curta</label>
+          <input id="seqDescricao" placeholder="Ex: Para leads novos" class="w-full px-3 py-2 border rounded-lg text-sm">
+        </div>
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="block text-xs font-medium">Mensagens da sequência</label>
+            <button type="button" onclick="adicionarPasso()" class="text-green-600 text-xs font-semibold">+ Adicionar passo</button>
+          </div>
+          <div id="passosSequencia" class="space-y-2"></div>
+        </div>
+      </div>
+      <div class="flex gap-2 mt-5">
+        <button type="button" onclick="excluirSeqAtual()" id="btnExcluirSeq" class="hidden text-red-600 text-sm font-medium mr-auto">Excluir</button>
+        <button type="button" onclick="fecharModal('seqModal')" class="px-4 py-2 rounded-lg text-sm font-medium text-gray-600">Cancelar</button>
+        <button type="submit" class="px-4 py-2 rounded-lg text-sm font-semibold bg-green-600 text-white">Salvar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ===== MODAL CONFIG ===== -->
+  <dialog id="configModal" class="w-full max-w-md">
+    <form method="dialog" class="p-6" onsubmit="salvarConfig(event)">
+      <h3 class="font-bold text-lg mb-1">Configurações</h3>
+      <p class="text-xs text-gray-500 mb-4">Esses dados ficam salvos na sua conta (Supabase).</p>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-medium mb-1">WhatsApp da empresa (com DDI+DDD, só números)</label>
+          <input id="cfgWhats" placeholder="5538999999999" class="w-full px-3 py-2 border rounded-lg text-sm">
+        </div>
+        <div class="bg-gray-50 rounded-lg px-3 py-2 text-xs text-gray-500">
+          <i class="fas fa-circle-info mr-1"></i> Login e senha agora são gerenciados pela sua conta — use a tela de login pra trocar a senha (em breve) ou peça pra mim ajudar via Supabase Auth.
+        </div>
+      </div>
+
+      <hr class="my-4">
+      <h4 class="font-semibold text-sm mb-1 flex items-center gap-2"><i class="fas fa-plug text-green-600"></i> Envio automático (Evolution API)</h4>
+      <p class="text-xs text-gray-500 mb-3">Preenche isso pra ligar o disparo automático de verdade.</p>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-medium mb-1">URL da Evolution API</label>
+          <input id="cfgEvoUrl" placeholder="https://sua-instancia.up.railway.app" class="w-full px-3 py-2 border rounded-lg text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-medium mb-1">Nome da instância</label>
+          <input id="cfgEvoInstance" placeholder="zapfollow" class="w-full px-3 py-2 border rounded-lg text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-medium mb-1">Token da instância (apikey)</label>
+          <input id="cfgEvoKey" type="password" placeholder="cole o token aqui" class="w-full px-3 py-2 border rounded-lg text-sm">
+        </div>
+        <div class="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
+          <div>
+            <div class="text-xs font-medium">Envio 100% automático</div>
+            <div class="text-[10px] text-gray-500">Dispara sozinho enquanto esta aba ficar aberta</div>
+          </div>
+          <input type="checkbox" id="cfgAutoSend" class="w-5 h-5 accent-green-600">
+        </div>
+        <button type="button" onclick="testarConexaoEvo()" class="w-full bg-gray-100 hover:bg-gray-200 text-sm font-medium py-2 rounded-lg">
+          <i class="fas fa-satellite-dish mr-1"></i> Testar conexão
+        </button>
+        <div id="evoTestResult" class="text-xs"></div>
+      </div>
+
+      <div class="bg-blue-50 text-blue-700 text-xs rounded-lg p-3 mt-4 leading-relaxed">
+        💡 Com a Evolution API preenchida, o "Enviar agora" passa a mandar a mensagem direto, sem precisar abrir o WhatsApp. Se "Envio 100% automático" estiver ligado, os follow-ups vencidos são disparados sozinhos a cada minuto — só funciona com essa aba aberta no navegador.
+      </div>
+      <div class="flex gap-2 mt-5 justify-end">
+        <button type="button" onclick="fecharModal('configModal')" class="px-4 py-2 rounded-lg text-sm font-medium text-gray-600">Cancelar</button>
+        <button type="submit" class="px-4 py-2 rounded-lg text-sm font-semibold bg-green-600 text-white">Salvar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- CHAT WHATSAPP DENTRO DO CRM -->
+  <dialog id="waChatModal" class="wa-chat-modal">
+    <div class="h-full flex flex-col">
+      <div class="wa-chat-head">
+        <button onclick="fecharModal('waChatModal')" class="wa-icon-btn" title="Voltar"><i class="fas fa-arrow-left"></i></button>
+        <div class="wa-avatar" id="waChatAvatar">WA</div>
+        <div class="min-w-0 flex-1">
+          <div id="waChatNome" class="font-bold truncate">Conversa</div>
+          <div id="waChatTelefone" class="wa-chat-status truncate"></div>
+        </div>
+        <span id="waChatStatus" class="wa-pill wa-pill-green">CRM</span>
+      </div>
+      <div id="waChatBody" class="wa-chat-body"></div>
+      <div class="wa-chat-foot">
+        <input id="waChatInput" class="wa-chat-input" placeholder="Digite uma mensagem..." autocomplete="off" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarMensagemCRM();}">
+        <button id="waChatSend" class="wa-send-btn" onclick="enviarMensagemCRM()" title="Enviar"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+  </dialog>
+
+<script>
+/* ======================= SUPABASE ======================= */
+const SUPABASE_URL = 'https://omdoglxuppiilpvvezsw.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_ooUxkkOsnIVvVoK4Jo-rkQ_bhgSyLwu';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ======================= ESTADO EM MEMÓRIA ======================= */
+let db = {
+  config: { whats: "5538999999999", evoUrl: "", evoInstance: "", evoKey: "", autoSend: false },
+  leads: [], sequencias: [], automacoes: [], followups: [], mensagens: []
+};
+
+const SEQUENCIAS_PADRAO = [
+  {nome:"Follow-up Padrão", descricao:"Para leads novos", passos:[
+    {dias:1, mensagem:"Oi {nome}! Tudo bem? Vi que você se interessou pelos nossos produtos, posso te ajudar com alguma dúvida?"},
+    {dias:3, mensagem:"Oi {nome}, passando pra saber se ainda tem interesse — tenho novidades que podem te interessar."},
+    {dias:7, mensagem:"Oi {nome}! Última tentativa por aqui — se ainda fizer sentido pra você, é só chamar."}
+  ]},
+  {nome:"Recuperação de Lead Frio", descricao:"Leads sem resposta", passos:[
+    {dias:0, mensagem:"Oi {nome}, faz um tempo que não conversamos — ainda está em busca do que combinamos?"},
+    {dias:4, mensagem:"Oi {nome}! Deixando essa mensagem por aqui, qualquer coisa é só chamar."}
+  ]},
+  {nome:"Pós-Proposta", descricao:"Depois de enviar orçamento", passos:[
+    {dias:1, mensagem:"Oi {nome}! O que achou da proposta que te enviei?"},
+    {dias:3, mensagem:"Oi {nome}, a proposta ainda está válida — posso ajustar algo pra fechar com você?"}
+  ]}
+];
+
+function statusLabel(s){ return {Novo:"Novo", Em_conversa:"Em conversa", Proposta:"Proposta", Fechado:"Fechado", Perdido:"Perdido"}[s] || s; }
+function fmtData(ts){ return new Date(ts).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit'}); }
+function normalizarTelefoneBR(numero){
+  let n = (numero || '').replace(/\D/g,'');
+  if(n.length === 10 || n.length === 11) n = '55' + n;
+  return n;
+}
+function waHref(telefone, msg){ return `https://wa.me/${normalizarTelefoneBR(telefone)}?text=${encodeURIComponent(msg||'')}`; }
+
+/* ======================= CARREGAR DADOS DO SUPABASE ======================= */
+async function carregarTudo(){
+  const [leadsRes, seqRes, autoRes, fwRes, msgRes, cfgRes] = await Promise.all([
+    sb.from('leads').select('*').order('criado_em', {ascending:false}),
+    sb.from('sequencias').select('*').order('criado_em', {ascending:true}),
+    sb.from('automacoes').select('*'),
+    sb.from('followups').select('*'),
+    sb.from('mensagens').select('*').limit(200),
+    sb.from('config').select('*').maybeSingle()
+  ]);
+  db.leads = (leadsRes.data||[]).map(r=>({id:r.id, nome:r.nome, telefone:r.telefone, origem:r.origem, status:r.status, notas:r.notas, criadoEm: new Date(r.criado_em).getTime()}));
+  db.sequencias = (seqRes.data||[]).map(r=>({id:r.id, nome:r.nome, descricao:r.descricao, passos:r.passos||[]}));
+  db.automacoes = (autoRes.data||[]).map(r=>({id:r.id, gatilhoStatus:r.gatilho_status, sequenciaId:r.sequencia_id, ativo:r.ativo}));
+  db.followups = (fwRes.data||[]).map(r=>({id:r.id, leadId:r.lead_id, sequenciaId:r.sequencia_id, mensagem:r.mensagem, dueEm: new Date(r.due_em).getTime(), enviado:r.enviado, enviadoAutomaticamente:r.enviado_automaticamente}));
+  db.mensagens = (msgRes.data||[]).map(normalizarMensagem);
+  if(cfgRes.data){
+    db.config = {
+      whats: cfgRes.data.whats || "5538999999999",
+      evoUrl: cfgRes.data.evo_url || "",
+      evoInstance: cfgRes.data.evo_instance || "",
+      evoKey: cfgRes.data.evo_key || "",
+      autoSend: !!cfgRes.data.auto_send
+    };
+  }
+}
+
+/* Cria os dados iniciais (sequências de exemplo + linha de config) na primeira vez que o usuário loga */
+async function semearDadosIniciais(userId){
+  const { data: cfgExistente } = await sb.from('config').select('user_id').eq('user_id', userId).maybeSingle();
+  if(cfgExistente) return; // já foi semeado antes, não duplica
+
+  await sb.from('config').insert({ user_id: userId, whats: "5538999999999", auto_send: false });
+
+  const seqParaInserir = SEQUENCIAS_PADRAO.map(s=>({ user_id: userId, nome:s.nome, descricao:s.descricao, passos:s.passos }));
+  const { data: seqsCriadas } = await sb.from('sequencias').insert(seqParaInserir).select();
+
+  if(seqsCriadas && seqsCriadas.length === 3){
+    await sb.from('automacoes').insert([
+      { user_id: userId, gatilho_status: 'Novo', sequencia_id: seqsCriadas[0].id, ativo: true },
+      { user_id: userId, gatilho_status: 'Proposta', sequencia_id: seqsCriadas[2].id, ativo: true },
+      { user_id: userId, gatilho_status: 'Em_conversa', sequencia_id: seqsCriadas[1].id, ativo: false }
+    ]);
+  }
+}
+
+/* ======================= NAV / LOGIN (Supabase Auth) ======================= */
+let modoLogin = 'entrar'; // ou 'criar'
+
+async function irParaAdmin(){
+  document.getElementById('landing').classList.add('hidden');
+  const { data: { session } } = await sb.auth.getSession();
+  if(session){
+    await abrirPainelLogado();
+  } else {
+    document.getElementById('login-screen').classList.remove('hidden');
+  }
+}
+function voltarLanding(){
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('landing').classList.remove('hidden');
+}
+function alternarModoLogin(){
+  modoLogin = modoLogin === 'entrar' ? 'criar' : 'entrar';
+  document.getElementById('login-subtitle').textContent = modoLogin === 'entrar' ? 'Entrar no painel' : 'Criar sua conta';
+  document.getElementById('btnLogin').textContent = modoLogin === 'entrar' ? 'Entrar' : 'Criar conta';
+  document.getElementById('btnAlternarModo').textContent = modoLogin === 'entrar' ? 'Não tem conta ainda? Criar uma' : 'Já tem conta? Entrar';
+  document.getElementById('login-error').classList.add('hidden');
+  document.getElementById('login-info').classList.add('hidden');
+}
+async function fazerLogin(){
+  const email = document.getElementById('usuario').value.trim();
+  const senha = document.getElementById('senha').value;
+  const erroEl = document.getElementById('login-error');
+  const infoEl = document.getElementById('login-info');
+  erroEl.classList.add('hidden'); infoEl.classList.add('hidden');
+
+  if(!email || !senha){ erroEl.textContent = 'Preenche e-mail e senha.'; erroEl.classList.remove('hidden'); return; }
+
+  const btn = document.getElementById('btnLogin');
+  const textoOriginal = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Aguarde...';
+
+  if(modoLogin === 'criar'){
+    const { data, error } = await sb.auth.signUp({ email, password: senha });
+    btn.disabled = false; btn.textContent = textoOriginal;
+    if(error){ erroEl.textContent = error.message; erroEl.classList.remove('hidden'); return; }
+    if(data.session){
+      await abrirPainelLogado();
+    } else {
+      infoEl.textContent = 'Conta criada! Verifica seu e-mail pra confirmar antes de entrar.';
+      infoEl.classList.remove('hidden');
+      alternarModoLogin();
+    }
+  } else {
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: senha });
+    btn.disabled = false; btn.textContent = textoOriginal;
+    if(error){ erroEl.textContent = 'E-mail ou senha incorretos.'; erroEl.classList.remove('hidden'); return; }
+    await abrirPainelLogado();
+  }
+}
+async function abrirPainelLogado(){
+  const { data: { user } } = await sb.auth.getUser();
+  if(user) await semearDadosIniciais(user.id);
+  await carregarTudo();
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('admin-panel').classList.remove('hidden');
+  renderTudo();
+  configurarAutoSendLoop();
+  iniciarRealtimeMensagens();
+}
+async function sair(){
+  await sb.auth.signOut();
+  if(autoSendTimer){ clearInterval(autoSendTimer); autoSendTimer = null; }
+  document.getElementById('admin-panel').classList.add('hidden');
+  document.getElementById('landing').classList.remove('hidden');
+  document.getElementById('usuario').value = '';
+  document.getElementById('senha').value = '';
+}
+function mostrarSecao(nome, btn){
+  ['dashboard','clientes','conversas','followups','sequencias','automacoes'].forEach(s=>{
+    document.getElementById('secao-'+s).classList.add('hidden');
+  });
+  document.getElementById('secao-'+nome).classList.remove('hidden');
+  document.querySelectorAll('.menu-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(nome==='dashboard') renderDashboard();
+  if(nome==='clientes') renderClientes();
+  if(nome==='conversas') renderConversas();
+  if(nome==='followups') renderFollowups();
+  if(nome==='sequencias') renderSequencias();
+  if(nome==='automacoes') renderAutomacoes();
+}
+
+/* ======================= LINKS WHATSAPP FIXOS ======================= */
+function atualizarLinksFixos(){
+  const numeroWhatsAppVendas = "5569993203609";
+  const msgLanding = "Olá! Vi o site da Boostflow CRM e quero comprar/assinar. Quero mais informações.";
+  const msgCta = `Olá! Quero testar o Boostflow`;
+  document.getElementById('landingWaBtn').href = waHref(numeroWhatsAppVendas, msgLanding);
+  document.getElementById('ctaWaBtn').href = waHref(db.config.whats, msgCta);
+  document.getElementById('ctaWaLabel').textContent = '(' + db.config.whats.slice(2,4) + ') ' + db.config.whats.slice(4,9) + '-' + db.config.whats.slice(9);
+  document.getElementById('topWaBtn').href = waHref(db.config.whats, "");
+  document.querySelectorAll('.plano-link').forEach(a=>{
+    a.href = waHref(db.config.whats, `Quero o plano ${a.dataset.plano}`);
+  });
+  document.getElementById('anoFooter').textContent = new Date().getFullYear();
+}
+
+/* ======================= DASHBOARD ======================= */
+function renderDashboard(){
+  const total = db.leads.length;
+  const pendentes = db.followups.filter(f=>!f.enviado).length;
+  const novos = db.leads.filter(l=>l.status==='Novo').length;
+  const emConversa = db.leads.filter(l=>l.status==='Em_conversa').length;
+  document.getElementById('dashStats').innerHTML = `
+    <div class="bg-white rounded-xl p-4 shadow-sm"><div class="text-xs text-gray-500">Total de Leads</div><div class="text-2xl font-bold">${total}</div></div>
+    <div class="bg-white rounded-xl p-4 shadow-sm"><div class="text-xs text-gray-500">Follow-ups pendentes</div><div class="text-2xl font-bold text-green-600">${pendentes}</div></div>
+    <div class="bg-white rounded-xl p-4 shadow-sm"><div class="text-xs text-gray-500">Novos</div><div class="text-2xl font-bold text-blue-600">${novos}</div></div>
+    <div class="bg-white rounded-xl p-4 shadow-sm"><div class="text-xs text-gray-500">Em conversa</div><div class="text-2xl font-bold text-yellow-600">${emConversa}</div></div>
+  `;
+  const prox = db.followups.filter(f=>!f.enviado).sort((a,b)=>a.dueEm-b.dueEm).slice(0,5);
+  document.getElementById('dashProximos').innerHTML = prox.length ? prox.map(f=>{
+    const lead = db.leads.find(l=>l.id===f.leadId);
+    return `<div class="flex justify-between items-center text-sm">
+      <div><div class="font-medium text-gray-800">${lead ? lead.nome : '—'}</div><div class="text-xs text-gray-500">${fmtData(f.dueEm)}</div></div>
+      <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Pendente</span>
+    </div>`;
+  }).join('') : `<p class="text-sm text-gray-400">Nenhum follow-up agendado.</p>`;
+}
+
+/* ======================= CLIENTES (CRUD) ======================= */
+function renderClientes(){
+  document.getElementById('listaClientes').innerHTML = db.leads.map(l=>`
+    <div class="bg-white rounded-xl p-4 shadow-sm">
+      <div class="flex justify-between items-start">
+        <div>
+          <div class="font-semibold">${l.nome}</div>
+          <div class="text-sm text-gray-500">${l.telefone} • ${l.origem||'—'}</div>
+        </div>
+        <span class="text-xs px-2 py-1 rounded-full status-${l.status}">${statusLabel(l.status)}</span>
+      </div>
+      ${l.notas ? `<p class="text-xs text-gray-500 mt-2">${l.notas}</p>` : ''}
+      <div class="flex gap-4 mt-3">
+        <a href="${waHref(l.telefone,'')}" target="_blank" class="text-green-600 text-sm"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+        <button onclick="abrirLeadModal('${l.id}')" class="text-gray-500 text-sm"><i class="fas fa-pen"></i> Editar</button>
+      </div>
+    </div>
+  `).join('') || `<p class="text-sm text-gray-400">Nenhum lead cadastrado ainda.</p>`;
+}
+
+function abrirLeadModal(id){
+  const modal = document.getElementById('leadModal');
+  document.getElementById('leadId').value = id || '';
+  if(id){
+    const l = db.leads.find(x=>x.id===id);
+    document.getElementById('leadModalTitulo').textContent = 'Editar lead';
+    document.getElementById('leadNome').value = l.nome;
+    document.getElementById('leadTelefone').value = l.telefone;
+    document.getElementById('leadOrigem').value = l.origem||'';
+    document.getElementById('leadStatus').value = l.status;
+    document.getElementById('leadNotas').value = l.notas||'';
+    document.getElementById('btnExcluirLead').classList.remove('hidden');
+  } else {
+    document.getElementById('leadModalTitulo').textContent = 'Novo lead';
+    ['leadNome','leadTelefone','leadOrigem','leadNotas'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('leadStatus').value = 'Novo';
+    document.getElementById('btnExcluirLead').classList.add('hidden');
+  }
+  modal.showModal();
+}
+async function salvarLead(e){
+  e.preventDefault();
+  const id = document.getElementById('leadId').value;
+  const statusAntigo = id ? db.leads.find(l=>l.id==id).status : null;
+  const dados = {
+    nome: document.getElementById('leadNome').value.trim(),
+    telefone: normalizarTelefoneBR(document.getElementById('leadTelefone').value),
+    origem: document.getElementById('leadOrigem').value.trim(),
+    status: document.getElementById('leadStatus').value,
+    notas: document.getElementById('leadNotas').value.trim(),
+  };
+  const { data: { user } } = await sb.auth.getUser();
+  if(id){
+    await sb.from('leads').update(dados).eq('id', id);
+    if(statusAntigo !== dados.status) await dispararAutomacao({id, ...dados});
+  } else {
+    const { data: novo } = await sb.from('leads').insert({ user_id: user.id, ...dados }).select().single();
+    if(novo) await dispararAutomacao({id: novo.id, ...dados});
+  }
+  await carregarTudo();
+  fecharModal('leadModal');
+  renderClientes(); renderDashboard(); renderFollowups();
+}
+async function excluirLeadAtual(){
+  const id = document.getElementById('leadId').value;
+  if(!id) return;
+  if(!confirm('Excluir este lead? Os follow-ups associados também serão removidos.')) return;
+  await sb.from('leads').delete().eq('id', id); // followups têm on delete cascade
+  await carregarTudo();
+  fecharModal('leadModal');
+  renderClientes(); renderDashboard(); renderFollowups();
+}
+
+/* ======================= FOLLOW-UPS ======================= */
+function renderFollowups(){
+  const pendentes = db.followups.filter(f=>!f.enviado).sort((a,b)=>a.dueEm-b.dueEm);
+  const evoOk = evoConfigurada();
+  document.getElementById('listaFollowups').innerHTML = pendentes.map(f=>{
+    const lead = db.leads.find(l=>l.id===f.leadId);
+    if(!lead) return '';
+    const msg = f.mensagem.replace('{nome}', lead.nome);
+    const botaoAutomatico = evoOk
+      ? `<button onclick="enviarFollowupAgora('${f.id}', this)" class="inline-flex items-center gap-2 mt-3 bg-green-600 text-white text-sm px-4 py-1.5 rounded-lg">
+           <i class="fas fa-bolt"></i> Enviar agora
+         </button>`
+      : `<a href="${waHref(lead.telefone, msg)}" target="_blank" onclick="marcarEnviado('${f.id}')" class="inline-block mt-3 bg-green-600 text-white text-sm px-4 py-1.5 rounded-lg">Enviar agora (manual)</a>`;
+    return `<div class="bg-white rounded-xl p-4 shadow-sm" id="followup-${f.id}">
+      <div class="font-medium">${lead.nome}</div>
+      <div class="text-sm text-gray-500 mt-1">${msg}</div>
+      <div class="text-xs text-gray-400 mt-2">${fmtData(f.dueEm)}</div>
+      ${botaoAutomatico}
+    </div>`;
+  }).join('') || `<p class="text-sm text-gray-400">Nenhum follow-up pendente. Eles aparecem aqui quando o status de um lead ativa uma automação.</p>`;
+  if(!evoOk && pendentes.length){
+    document.getElementById('listaFollowups').insertAdjacentHTML('afterbegin',
+      `<div class="bg-amber-50 text-amber-700 text-xs rounded-lg p-3 mb-1">⚠️ Envio automático não configurado. Os botões abaixo abrem o WhatsApp manualmente — configure a Evolution API em <i class="fas fa-gear"></i> Configurações pra enviar direto.</div>`);
+  }
+}
+async function marcarEnviado(id){
+  await sb.from('followups').update({ enviado: true }).eq('id', id);
+  const f = db.followups.find(x=>x.id===id);
+  if(f) f.enviado = true;
+  setTimeout(()=>{renderFollowups(); renderDashboard();}, 300);
+}
+async function enviarFollowupAgora(id, btnEl){
+  const f = db.followups.find(x=>x.id===id);
+  if(!f) return;
+  const lead = db.leads.find(l=>l.id===f.leadId);
+  if(!lead) return;
+  const msg = f.mensagem.replace('{nome}', lead.nome);
+  const original = btnEl.innerHTML;
+  btnEl.disabled = true;
+  btnEl.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Enviando...`;
+  const resultado = await enviarViaEvolution(lead.telefone, msg);
+  if(resultado.ok){
+    await sb.from('followups').update({ enviado: true }).eq('id', id);
+    f.enviado = true;
+    renderFollowups(); renderDashboard();
+  } else {
+    btnEl.disabled = false;
+    btnEl.innerHTML = original;
+    alert('Não consegui enviar automaticamente (' + resultado.motivo + '). Verifique a conexão da Evolution API em Configurações, ou use o link manual do WhatsApp: ' + waHref(lead.telefone, msg));
+  }
+}
+
+/* ======================= SEQUÊNCIAS ======================= */
+function renderSequencias(){
+  document.getElementById('listaSequencias').innerHTML = db.sequencias.map(s=>`
+    <div class="bg-white rounded-xl p-4 shadow-sm cursor-pointer" onclick="abrirSeqModal('${s.id}')">
+      <div class="font-semibold">${s.nome}</div>
+      <div class="text-sm text-gray-500">${s.descricao||''} • ${s.passos.length} mensagem(ns)</div>
+    </div>
+  `).join('') || `<p class="text-sm text-gray-400">Nenhuma sequência criada.</p>`;
+}
+let passosTemp = [];
+function adicionarPasso(dias=1, mensagem=''){
+  passosTemp.push({dias, mensagem});
+  renderPassosTemp();
+}
+function removerPasso(idx){ passosTemp.splice(idx,1); renderPassosTemp(); }
+function renderPassosTemp(){
+  document.getElementById('passosSequencia').innerHTML = passosTemp.map((p,idx)=>`
+    <div class="border rounded-lg p-2 flex gap-2 items-start">
+      <div class="w-20">
+        <label class="text-[10px] text-gray-400">Dias depois</label>
+        <input type="number" min="0" value="${p.dias}" onchange="passosTemp[${idx}].dias=Number(this.value)" class="w-full px-2 py-1 border rounded text-xs">
+      </div>
+      <div class="flex-1">
+        <label class="text-[10px] text-gray-400">Mensagem (use {nome} pro nome do lead)</label>
+        <textarea rows="2" onchange="passosTemp[${idx}].mensagem=this.value" class="w-full px-2 py-1 border rounded text-xs">${p.mensagem}</textarea>
+      </div>
+      <button type="button" onclick="removerPasso(${idx})" class="text-red-400 text-xs mt-4">✕</button>
+    </div>
+  `).join('');
+}
+function abrirSeqModal(id){
+  document.getElementById('seqId').value = id || '';
+  if(id){
+    const s = db.sequencias.find(x=>x.id===id);
+    document.getElementById('seqModalTitulo').textContent = 'Editar sequência';
+    document.getElementById('seqNome').value = s.nome;
+    document.getElementById('seqDescricao').value = s.descricao||'';
+    passosTemp = structuredClone(s.passos);
+    document.getElementById('btnExcluirSeq').classList.remove('hidden');
+  } else {
+    document.getElementById('seqModalTitulo').textContent = 'Nova sequência';
+    document.getElementById('seqNome').value = '';
+    document.getElementById('seqDescricao').value = '';
+    passosTemp = [{dias:1, mensagem:'Oi {nome}! '}];
+    document.getElementById('btnExcluirSeq').classList.add('hidden');
+  }
+  renderPassosTemp();
+  document.getElementById('seqModal').showModal();
+}
+async function salvarSequencia(e){
+  e.preventDefault();
+  const id = document.getElementById('seqId').value;
+  const dados = {
+    nome: document.getElementById('seqNome').value.trim(),
+    descricao: document.getElementById('seqDescricao').value.trim(),
+    passos: structuredClone(passosTemp)
+  };
+  if(id){
+    await sb.from('sequencias').update(dados).eq('id', id);
+  } else {
+    const { data: { user } } = await sb.auth.getUser();
+    await sb.from('sequencias').insert({ user_id: user.id, ...dados });
+  }
+  await carregarTudo();
+  fecharModal('seqModal');
+  renderSequencias(); renderAutomacoes();
+}
+async function excluirSeqAtual(){
+  const id = document.getElementById('seqId').value;
+  if(!id) return;
+  if(!confirm('Excluir esta sequência? Automações que a usam serão desativadas.')) return;
+  await sb.from('automacoes').update({ ativo: false }).eq('sequencia_id', id);
+  await sb.from('sequencias').delete().eq('id', id);
+  await carregarTudo();
+  fecharModal('seqModal');
+  renderSequencias(); renderAutomacoes();
+}
+
+/* ======================= AUTOMAÇÕES ======================= */
+function renderAutomacoes(){
+  document.getElementById('listaAutomacoes').innerHTML = db.automacoes.map(a=>{
+    const seq = db.sequencias.find(s=>s.id===a.sequenciaId);
+    return `<div class="bg-white rounded-xl p-4 shadow-sm flex justify-between items-center gap-3">
+      <div class="flex-1">
+        <div class="font-medium text-sm">Status = ${statusLabel(a.gatilhoStatus)}</div>
+        <select onchange="mudarSeqAutomacao('${a.id}', this.value)" class="text-xs text-gray-500 mt-1 border rounded px-1 py-0.5">
+          ${db.sequencias.map(s=>`<option value="${s.id}" ${s.id===a.sequenciaId?'selected':''}>→ ${s.nome}</option>`).join('')}
+        </select>
+      </div>
+      <input type="checkbox" ${a.ativo?'checked':''} onchange="toggleAutomacao('${a.id}', this.checked)" class="w-5 h-5 accent-green-600">
+    </div>`;
+  }).join('') || `<p class="text-sm text-gray-400">Nenhuma automação configurada.</p>`;
+}
+async function toggleAutomacao(id, ativo){
+  await sb.from('automacoes').update({ ativo }).eq('id', id);
+  const a = db.automacoes.find(x=>x.id===id);
+  if(a) a.ativo = ativo;
+}
+async function mudarSeqAutomacao(id, seqId){
+  await sb.from('automacoes').update({ sequencia_id: seqId }).eq('id', id);
+  const a = db.automacoes.find(x=>x.id===id);
+  if(a) a.sequenciaId = seqId;
+}
+async function dispararAutomacao(lead){
+  const auto = db.automacoes.find(a=>a.ativo && a.gatilhoStatus===lead.status);
+  if(!auto) return;
+  const seq = db.sequencias.find(s=>s.id===auto.sequenciaId);
+  if(!seq) return;
+  const { data: { user } } = await sb.auth.getUser();
+  const agora = Date.now();
+  const novosFollowups = seq.passos.map(p=>({
+    user_id: user.id,
+    lead_id: lead.id,
+    sequencia_id: seq.id,
+    mensagem: p.mensagem,
+    due_em: new Date(agora + p.dias*24*60*60*1000).toISOString(),
+    enviado: false
+  }));
+  await sb.from('followups').insert(novosFollowups);
+}
+
+/* ======================= CONVERSAS / MENSAGENS ======================= */
+function normalizarMensagem(r){
+  const ts = r.created_at || r.criado_em || r.createdAt || r.data || r.timestamp || new Date().toISOString();
+  return {
+    id: r.id,
+    leadId: r.lead_id || r.leadId || null,
+    telefone: r.telefone || r.phone || r.numero || r.remote_jid || r.from || '',
+    texto: r.mensagem || r.message || r.texto || r.text || r.conteudo || r.body || '',
+    direcao: r.from_me === true ? 'saida' : (r.direcao || r.direction || r.tipo || 'entrada'),
+    lida: r.lida ?? r.read ?? false,
+    criadoEm: new Date(ts).getTime()
+  };
+}
+
+async function carregarMensagens(){
+  const {data, error} = await sb.from('mensagens').select('*').limit(200);
+  if(error){
+    console.error('Erro ao carregar mensagens:', error);
+    document.getElementById('listaConversas').innerHTML = `<div class="bg-red-50 text-red-700 rounded-xl p-4 text-sm">Não consegui carregar as mensagens. Confira a tabela <b>mensagens</b> e as policies RLS no Supabase.</div>`;
+    return;
+  }
+  db.mensagens = (data||[]).map(normalizarMensagem).sort((a,b)=>b.criadoEm-a.criadoEm);
+  renderConversas();
+}
+
+function fmtHora(ts){ return new Date(ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}); }
+let filtroConversas = 'todos';
+function setFiltroConversas(filtro){
+  filtroConversas = filtro;
+  document.getElementById('filtroTodos')?.classList.toggle('active', filtro==='todos');
+  document.getElementById('filtroNaoLidas')?.classList.toggle('active', filtro==='nao_lidas');
+  renderConversas();
+}
+function avatarNome(nome, telefone){
+  const base = (nome && nome.trim()) || telefone || '?';
+  const partes = base.trim().split(/\s+/).filter(Boolean);
+  return esc((partes.length>1 ? partes[0][0]+partes[partes.length-1][0] : base.slice(0,2)).toUpperCase());
+}
+function renderConversas(){
+  const lista = document.getElementById('listaConversas');
+  if(!lista) return;
+  const busca = (document.getElementById('buscaConversas')?.value || '').trim().toLowerCase();
+  const grupos = new Map();
+  [...(db.mensagens||[])].sort((a,b)=>b.criadoEm-a.criadoEm).forEach(m=>{
+    const lead = db.leads.find(l=>l.id===m.leadId) || db.leads.find(l=>normalizarTelefoneBR(l.telefone)===normalizarTelefoneBR(m.telefone));
+    const key = m.leadId || normalizarTelefoneBR(m.telefone) || m.id;
+    if(!grupos.has(key)) grupos.set(key,{lead,mensagens:[]});
+    grupos.get(key).mensagens.push(m);
+  });
+  let arr=[...grupos.values()].map(g=>{
+    const ultima=g.mensagens[0];
+    const naoLidas=g.mensagens.filter(m=>!m.lida && m.direcao!=='saida').length;
+    return {...g,ultima,naoLidas};
+  });
+  if(filtroConversas==='nao_lidas') arr=arr.filter(g=>g.naoLidas>0);
+  if(busca) arr=arr.filter(g=>{
+    const nome=g.lead?.nome||''; const tel=g.lead?.telefone||g.ultima.telefone||'';
+    return `${nome} ${tel} ${g.ultima.texto}`.toLowerCase().includes(busca);
+  });
+  const totalGrupos=[...grupos.values()];
+  const totalNaoLidas=totalGrupos.reduce((s,g)=>s+g.mensagens.filter(m=>!m.lida&&m.direcao!=='saida').length,0);
+  const inicioHoje=new Date(); inicioHoje.setHours(0,0,0,0);
+  const hoje=(db.mensagens||[]).filter(m=>m.criadoEm>=inicioHoje.getTime()).length;
+  const setText=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v};
+  setText('waTotalConversas',totalGrupos.length); setText('waNaoLidas',totalNaoLidas); setText('waHoje',hoje);
+  setText('filtroTodosCount',totalGrupos.length); setText('filtroNaoLidasCount',totalNaoLidas);
+
+  lista.innerHTML = arr.map(g=>{
+    const ultima=g.ultima;
+    const nome=g.lead?.nome || ultima.telefone || 'Contato sem nome';
+    const telefone=g.lead?.telefone || ultima.telefone || '';
+    const texto=ultima.texto || '(mensagem sem texto)';
+    const horario=ultima.criadoEm ? new Date(ultima.criadoEm).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) : '';
+    const nomeEsc=esc(nome);
+    return `<div class="wa-conversation" onclick="abrirConversaWhats('${esc(telefone)}')">
+      <div class="wa-avatar">${avatarNome(nome,telefone)}<span class="wa-online"></span></div>
+      <div class="min-w-0 flex-1">
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2 min-w-0"><div class="font-bold truncate">${nomeEsc}</div>${g.lead?'<span class="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold">LEAD</span>':''}</div>
+          <span class="wa-time">${horario}</span>
+        </div>
+        <div class="text-[11px] text-gray-500 truncate">${esc(telefone)}</div>
+        <div class="flex items-center justify-between gap-2 mt-1">
+          <div class="wa-msg-preview">${ultima.direcao==='saida'?'Você: ':''}${esc(texto)}</div>
+          ${g.naoLidas?`<span class="wa-unread">${g.naoLidas}</span>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('') || `<div class="wa-hero text-center"><i class="fab fa-whatsapp text-4xl text-green-500 mb-3"></i><div class="font-bold">Nenhuma conversa encontrada</div><div class="text-sm opacity-60 mt-1">Quando uma mensagem chegar no WhatsApp, ela aparecerá aqui.</div></div>`;
+  const badge=document.getElementById('badgeConversas');
+  if(badge){ badge.textContent=String(totalGrupos.length); badge.classList.toggle('hidden', totalGrupos.length===0); }
+  renderFilaAtendimento();
+}
+async function abrirConversaWhats(telefone){
+  if(!telefone) return;
+  const numero=normalizarTelefoneBR(telefone);
+  const lead=db.leads.find(l=>normalizarTelefoneBR(l.telefone)===numero);
+  const pendentes=(db.mensagens||[]).filter(m=>!m.lida && m.direcao!=='saida' && (m.leadId===lead?.id || normalizarTelefoneBR(m.telefone)===numero));
+  if(pendentes.length){
+    pendentes.forEach(m=>m.lida=true);
+    renderConversas();
+    for(const m of pendentes){
+      try{ await sb.from('mensagens').update({lida:true}).eq('id',m.id); }catch(e){ console.warn('Não foi possível marcar mensagem como lida',e); }
+    }
+  }
+  abrirChatCRM(telefone);
+}
+
+function obterMensagensConversa(telefone){
+  const numero=normalizarTelefoneBR(telefone);
+  const lead=db.leads.find(l=>normalizarTelefoneBR(l.telefone)===numero);
+  return (db.mensagens||[]).filter(m=>m.leadId===lead?.id || normalizarTelefoneBR(m.telefone)===numero)
+    .sort((a,b)=>a.criadoEm-b.criadoEm);
+}
+
+function renderChatCRM(){
+  const body=document.getElementById('waChatBody');
+  if(!body || !window.waChatTelefone) return;
+  const msgs=obterMensagensConversa(window.waChatTelefone);
+  body.innerHTML=msgs.map(m=>`<div class="wa-bubble ${m.direcao==='saida'?'out':'in'}">
+    <div>${esc(m.texto||'(mensagem sem texto)')}</div>
+    <span class="wa-bubble-time">${m.criadoEm?new Date(m.criadoEm).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''}</span>
+  </div>`).join('') || `<div class="text-center opacity-60 text-sm mt-10">Nenhuma mensagem nesta conversa.</div>`;
+  requestAnimationFrame(()=>{ body.scrollTop=body.scrollHeight; });
+}
+
+function abrirChatCRM(telefone){
+  const numero=normalizarTelefoneBR(telefone);
+  const lead=db.leads.find(l=>normalizarTelefoneBR(l.telefone)===numero);
+  window.waChatTelefone=telefone;
+  const nome=lead?.nome || telefone;
+  const av=document.getElementById('waChatAvatar');
+  const nm=document.getElementById('waChatNome');
+  const tel=document.getElementById('waChatTelefone');
+  if(av) av.innerHTML=avatarNome(nome,telefone);
+  if(nm) nm.textContent=nome;
+  if(tel) tel.textContent=telefone;
+  renderChatCRM();
+  const modal=document.getElementById('waChatModal');
+  if(modal && !modal.open) modal.showModal();
+  setTimeout(()=>document.getElementById('waChatInput')?.focus(),120);
+}
+
+async function enviarMensagemCRM(){
+  const input=document.getElementById('waChatInput');
+  const btn=document.getElementById('waChatSend');
+  if(!input || !window.waChatTelefone) return;
+  const mensagem=input.value.trim();
+  if(!mensagem) return;
+  if(!evoConfigurada()){
+    alert('Configure a Evolution API em Configurações para enviar mensagens diretamente pelo CRM.');
+    return;
+  }
+  btn.disabled=true;
+  input.disabled=true;
+  try{
+    const resultado=await enviarViaEvolution(window.waChatTelefone,mensagem);
+    if(!resultado.ok){
+      alert('Não foi possível enviar a mensagem. Verifique a conexão da Evolution API.');
+      return;
+    }
+    const lead=db.leads.find(l=>normalizarTelefoneBR(l.telefone)===normalizarTelefoneBR(window.waChatTelefone));
+    const {data:{user}}=await sb.auth.getUser();
+    const payload={
+      user_id:user?.id,
+      lead_id:lead?.id || null,
+      telefone:normalizarTelefoneBR(window.waChatTelefone),
+      mensagem:mensagem,
+      direcao:'saida',
+      from_me:true,
+      lida:true,
+      created_at:new Date().toISOString()
+    };
+    const {data,error}=await sb.from('mensagens').insert(payload).select().single();
+    if(error){
+      console.warn('Mensagem enviada, mas não consegui salvar no histórico:',error);
+      db.mensagens.push(normalizarMensagem(payload));
+    } else if(data){
+      db.mensagens.push(normalizarMensagem(data));
+    }
+    input.value='';
+    renderChatCRM();
+    renderConversas();
+  } finally {
+    btn.disabled=false;
+    input.disabled=false;
+    input.focus();
+  }
+}
+
+function formatarEspera(ms){
+  const totalSeg=Math.max(0,Math.floor(ms/1000));
+  const h=Math.floor(totalSeg/3600), m=Math.floor((totalSeg%3600)/60), s=totalSeg%60;
+  if(h>0) return `${h}h ${String(m).padStart(2,'0')}min`;
+  if(m>0) return `${m}min ${String(s).padStart(2,'0')}s`;
+  return `${s}s`;
+}
+
+function obterClientesEsperando(){
+  const grupos=new Map();
+  (db.mensagens||[]).forEach(m=>{
+    if(m.direcao==='saida') return;
+    const key=m.leadId || normalizarTelefoneBR(m.telefone) || m.id;
+    if(!grupos.has(key)) grupos.set(key,[]);
+    grupos.get(key).push(m);
+  });
+  return [...grupos.entries()].map(([key,mensagens])=>{
+    const naoLidas=mensagens.filter(m=>!m.lida);
+    if(!naoLidas.length) return null;
+    const primeira=naoLidas.reduce((a,b)=>a.criadoEm<b.criadoEm?a:b);
+    const lead=db.leads.find(l=>l.id===primeira.leadId) || db.leads.find(l=>normalizarTelefoneBR(l.telefone)===normalizarTelefoneBR(primeira.telefone));
+    return {key,lead,telefone:lead?.telefone||primeira.telefone||'',desde:primeira.criadoEm};
+  }).filter(Boolean).sort((a,b)=>a.desde-b.desde);
+}
+
+function renderFilaAtendimento(){
+  const bar=document.getElementById('waWaitingBar');
+  if(!bar) return;
+  const fila=obterClientesEsperando();
+  if(!fila.length){ bar.classList.remove('show'); return; }
+  const pior=fila[0];
+  const plural=fila.length===1?'cliente':'clientes';
+  const title=document.getElementById('waWaitingTitle');
+  const sub=document.getElementById('waWaitingSub');
+  const time=document.getElementById('waWaitingTime');
+  if(title) title.textContent=`${fila.length} ${plural} esperando atendente`;
+  if(sub) sub.textContent=fila.length===1 ? `Aguardando desde ${new Date(pior.desde).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})} • clique para atender agora` : 'clique para atender agora';
+  if(time) time.textContent=`pior: ${formatarEspera(Date.now()-pior.desde)}`;
+  bar.classList.add('show');
+}
+
+function abrirFilaAtendimento(){
+  filtroConversas='nao_lidas';
+  const btn=document.querySelectorAll('.menu-btn')[2];
+  mostrarSecao('conversas',btn);
+  renderConversas();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+let filaTimer=setInterval(renderFilaAtendimento,1000);
+
+function esc(v){ return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+
+let mensagensPollingTimer = null;
+function iniciarRealtimeMensagens(){
+  // Realtime: aparece quase instantaneamente quando a tabela estiver habilitada no Supabase.
+  sb.channel('mensagens-realtime')
+    .on('postgres_changes',{event:'*',schema:'public',table:'mensagens'},payload=>{
+      const novo = payload.new ? normalizarMensagem(payload.new) : null;
+      if(payload.eventType==='INSERT' && novo){
+        const i=db.mensagens.findIndex(x=>x.id===novo.id);
+        if(i<0) db.mensagens.unshift(novo); else db.mensagens[i]=novo;
+        renderConversas(); renderDashboard(); if(window.waChatTelefone) renderChatCRM();
+      }
+      if(payload.eventType==='UPDATE' && novo){ const i=db.mensagens.findIndex(x=>x.id===novo.id); if(i>=0) db.mensagens[i]=novo; renderConversas(); if(window.waChatTelefone) renderChatCRM(); }
+      if(payload.eventType==='DELETE'){ db.mensagens=db.mensagens.filter(x=>x.id!==payload.old?.id); renderConversas(); if(window.waChatTelefone) renderChatCRM(); }
+    }).subscribe();
+
+  // Fallback: consulta periódica. Assim o CRM também atualiza mesmo que o Realtime ainda não esteja ativado.
+  if(mensagensPollingTimer) clearInterval(mensagensPollingTimer);
+  mensagensPollingTimer=setInterval(async()=>{
+    const {data,error}=await sb.from('mensagens').select('*').limit(200);
+    if(!error){
+      db.mensagens=(data||[]).map(normalizarMensagem).sort((a,b)=>b.criadoEm-a.criadoEm);
+      renderConversas();
+    }
+  },5000);
+}
+
+/* ======================= CONFIG ======================= */
+function abrirConfig(){
+  document.getElementById('cfgWhats').value = db.config.whats;
+  document.getElementById('cfgEvoUrl').value = db.config.evoUrl || '';
+  document.getElementById('cfgEvoInstance').value = db.config.evoInstance || '';
+  document.getElementById('cfgEvoKey').value = '';
+  document.getElementById('cfgEvoKey').placeholder = db.config.evoKey ? '•••••••• (já salvo, deixe em branco pra manter)' : 'cole o token aqui';
+  document.getElementById('cfgAutoSend').checked = !!db.config.autoSend;
+  document.getElementById('evoTestResult').innerHTML = '';
+  document.getElementById('configModal').showModal();
+}
+async function salvarConfig(e){
+  e.preventDefault();
+  db.config.whats = document.getElementById('cfgWhats').value.trim().replace(/\D/g,'');
+  db.config.evoUrl = document.getElementById('cfgEvoUrl').value.trim().replace(/\/$/,'');
+  db.config.evoInstance = document.getElementById('cfgEvoInstance').value.trim();
+  const novoToken = document.getElementById('cfgEvoKey').value.trim();
+  if(novoToken) db.config.evoKey = novoToken;
+  db.config.autoSend = document.getElementById('cfgAutoSend').checked;
+
+  const { data: { user } } = await sb.auth.getUser();
+  await sb.from('config').upsert({
+    user_id: user.id,
+    whats: db.config.whats,
+    evo_url: db.config.evoUrl,
+    evo_instance: db.config.evoInstance,
+    evo_key: db.config.evoKey,
+    auto_send: db.config.autoSend
+  });
+
+  fecharModal('configModal');
+  atualizarLinksFixos();
+  configurarAutoSendLoop();
+}
+
+/* ======================= EVOLUTION API ======================= */
+function evoConfigurada(){
+  return !!(db.config.evoUrl && db.config.evoInstance && db.config.evoKey);
+}
+async function enviarViaEvolution(telefoneCru, mensagem){
+  if(!evoConfigurada()) return {ok:false, motivo:'nao-configurado'};
+  const numero = normalizarTelefoneBR(telefoneCru);
+  try{
+    const resp = await fetch(`${db.config.evoUrl}/message/sendText/${encodeURIComponent(db.config.evoInstance)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': db.config.evoKey },
+      body: JSON.stringify({ number: numero, text: mensagem })
+    });
+    if(!resp.ok){
+      const texto = await resp.text().catch(()=> '');
+      return {ok:false, motivo:'http-'+resp.status, detalhe: texto};
+    }
+    return {ok:true};
+  } catch(err){
+    return {ok:false, motivo:'rede', detalhe: String(err)};
+  }
+}
+async function testarConexaoEvo(){
+  const url = document.getElementById('cfgEvoUrl').value.trim().replace(/\/$/,'');
+  const instance = document.getElementById('cfgEvoInstance').value.trim();
+  const key = document.getElementById('cfgEvoKey').value.trim() || db.config.evoKey;
+  const resultEl = document.getElementById('evoTestResult');
+  if(!url || !instance || !key){
+    resultEl.innerHTML = `<span class="text-amber-600">Preenche URL, instância e token antes de testar.</span>`;
+    return;
+  }
+  resultEl.innerHTML = `<span class="text-gray-400"><i class="fas fa-spinner fa-spin"></i> Testando...</span>`;
+  try{
+    const resp = await fetch(`${url}/instance/connectionState/${encodeURIComponent(instance)}`, {
+      headers: { 'apikey': key }
+    });
+    if(!resp.ok){
+      resultEl.innerHTML = `<span class="text-red-600">Não conectou (HTTP ${resp.status}). Confere URL e token.</span>`;
+      return;
+    }
+    const data = await resp.json();
+    const estado = data?.instance?.state || data?.state || 'desconhecido';
+    if(estado === 'open'){
+      resultEl.innerHTML = `<span class="text-green-600"><i class="fas fa-check-circle"></i> Conectado! Instância "${instance}" está online.</span>`;
+    } else {
+      resultEl.innerHTML = `<span class="text-amber-600">API respondeu, mas o status é "${estado}" — talvez precise reconectar o QR code.</span>`;
+    }
+  } catch(err){
+    resultEl.innerHTML = `<span class="text-red-600">Erro de conexão. Se a URL e o token estiverem certos, pode ser bloqueio de CORS na Evolution API.</span>`;
+  }
+}
+
+/* Envio automático em segundo plano, enquanto a aba estiver aberta */
+let autoSendTimer = null;
+function configurarAutoSendLoop(){
+  if(autoSendTimer){ clearInterval(autoSendTimer); autoSendTimer = null; }
+  if(db.config.autoSend && evoConfigurada()){
+    autoSendTimer = setInterval(processarAutoSend, 60000);
+    processarAutoSend();
+  }
+}
+async function processarAutoSend(){
+  const agora = Date.now();
+  const vencidos = db.followups.filter(f=>!f.enviado && f.dueEm <= agora);
+  for(const f of vencidos){
+    const lead = db.leads.find(l=>l.id===f.leadId);
+    if(!lead) continue;
+    const msg = f.mensagem.replace('{nome}', lead.nome);
+    const resultado = await enviarViaEvolution(lead.telefone, msg);
+    if(resultado.ok){
+      f.enviado = true;
+      f.enviadoAutomaticamente = true;
+      await sb.from('followups').update({ enviado: true, enviado_automaticamente: true }).eq('id', f.id);
+    }
+  }
+  if(!document.getElementById('secao-followups').classList.contains('hidden')) renderFollowups();
+  if(!document.getElementById('secao-dashboard').classList.contains('hidden')) renderDashboard();
+}
+
+/* ======================= HELPERS ======================= */
+function fecharModal(id){ document.getElementById(id).close(); }
+function renderTudo(){
+  atualizarLinksFixos();
+  renderDashboard(); renderClientes(); renderConversas(); renderFollowups(); renderSequencias(); renderAutomacoes();
+}
+
+/* ======================= TEMA ======================= */
+function aplicarTema(){
+  const tema=localStorage.getItem('boostflow_tema') || 'light';
+  document.documentElement.classList.toggle('dark', tema==='dark');
+  const b=document.getElementById('themeBtn');
+  if(b) b.innerHTML=tema==='dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+}
+function alternarTema(){
+  const atual=document.documentElement.classList.contains('dark')?'dark':'light';
+  localStorage.setItem('boostflow_tema', atual==='dark'?'light':'dark');
+  aplicarTema();
+}
+
+/* ======================= INIT ======================= */
+aplicarTema();
+atualizarLinksFixos();
+sb.auth.onAuthStateChange((event, session) => {
+  if(event === 'SIGNED_OUT'){
+    document.getElementById('admin-panel').classList.add('hidden');
+  }
+});
+</script>
+</body>
+</html>
